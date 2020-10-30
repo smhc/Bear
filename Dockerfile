@@ -5,7 +5,7 @@ RUN apt-get --yes -qq update \
                git cmake python \
                libfmt-dev libspdlog-dev nlohmann-json3-dev \
                libgrpc++-dev protobuf-compiler-grpc libssl-dev \
-               builtd-essential pkg-config \
+               build-essential pkg-config \
     && apt-get --yes -qq clean
 COPY . /home/
 WORKDIR /home
