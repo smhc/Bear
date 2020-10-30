@@ -15,4 +15,12 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+      run: docker build . --file Dockerfile --tag bear_build:latest
+    - name: Install staging
+      run: docker run -it --rm -v $(pwd)/stage:/home/build/stage bear_build:latest make install
+    - name: Package
+      run: tar -czvf bear.tar.gz -C stage *
+    - uses: actions/upload-artifact@v2
+      with:
+        name: bear_snapshot
+        path: bear.tar.gz
