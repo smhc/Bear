@@ -7,10 +7,10 @@ RUN apt-get --yes -qq update \
                libgrpc++-dev protobuf-compiler-grpc libssl-dev \
                build-essential pkg-config \
     && apt-get --yes -qq clean
-RUN mkdir -p /home/build
-RUN mkdir -p /home/src
+RUN mkdir -p /home/build && mkdir -p /home/src && mkdir -p /home/build/packages
 COPY . /home/src
 WORKDIR /home/build
-RUN cmake -DENABLE_UNIT_TESTS=OFF -DENABLE_FUNC_TESTS=OFF ../src
-RUN make -j5 all
-RUN make install
+RUN cmake -DENABLE_UNIT_TESTS=OFF -DENABLE_FUNC_TESTS=OFF ../src && \
+    make -j5 all && \
+    make package && \
+    mv bear-* packages/.
