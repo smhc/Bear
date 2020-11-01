@@ -1,0 +1,13 @@
+FROM oraclelinux:7.9
+RUN yum-config-manager --add-repo https://yum.oracle.com/repo/OracleLinux/OL7/SoftwareCollections/x86_64/ && \
+    yum-config-manager --add-repo http://yum.oracle.com/repo/OracleLinux/OL7/developer_EPEL/x86_64/ && \
+    yum-config-manager --enable ol7_optional_latest
+RUN yum -y install cmake3 scl-utils devtoolset-9 openssl-devel.x86_64 git
+RUN ln /usr/bin/ctest3 /usr/bin/ctest && \
+    mkdir -p /home/build && mkdir -p /home/src && mkdir -p /home/build/packages
+COPY . /home/src
+WORKDIR /home/build
+RUN scl enable devtoolset-9 'cmake3 -DENABLE_UNIT_TESTS=OFF -DENABLE_FUNC_TESTS=OFF ../src && \
+    make -j5 all && \
+    make package'
+RUN mv bear-* packages/.
