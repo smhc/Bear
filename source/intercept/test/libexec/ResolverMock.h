@@ -17,32 +17,32 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "libsys/Errors.h"
+#pragma once
 
-#include "config.h"
+#include "report/libexec/Resolver.h"
 
-#ifdef HAVE_STRERROR_R
-#include <cstring>
-#else
-#include <fmt/format.h>
-#endif
+#include "gmock/gmock.h"
 
-namespace sys {
+class ResolverMock : public el::Resolver {
+public:
+    MOCK_METHOD(
+            (rust::Result<const char*, int>),
+            from_current_directory,
+            (std::string_view const &),
+            (override)
+    );
 
-    std::string error_string(const int error) noexcept
-    {
-#ifdef HAVE_STRERROR_R
-#if defined(__GLIBC__) && defined(_GNU_SOURCE)
-        char buffer[256];
-        char* result = strerror_r(error, buffer, 255);
-        return std::string(result);
-#else
-        char buffer[256];
-        strerror_r(error, buffer, 255);
-        return std::string(buffer);
-#endif
-#else
-        return fmt::format("{0}", error);
-#endif
-    }
-}
+    MOCK_METHOD(
+            (rust::Result<const char*, int>),
+            from_path,
+            (std::string_view const &, char *const *),
+            (override)
+    );
+
+    MOCK_METHOD(
+            (rust::Result<const char*, int>),
+            from_search_path,
+            (std::string_view const &, const char *),
+            (override)
+    );
+};

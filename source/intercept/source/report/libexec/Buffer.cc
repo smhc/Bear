@@ -17,32 +17,23 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "libsys/Errors.h"
+#include <algorithm>
 
-#include "config.h"
+#include "report/libexec/Array.h"
+#include "report/libexec/Buffer.h"
 
-#ifdef HAVE_STRERROR_R
-#include <cstring>
-#else
-#include <fmt/format.h>
-#endif
+namespace el {
 
-namespace sys {
-
-    std::string error_string(const int error) noexcept
+    char const* Buffer::store(char const* const input) noexcept
     {
-#ifdef HAVE_STRERROR_R
-#if defined(__GLIBC__) && defined(_GNU_SOURCE)
-        char buffer[256];
-        char* result = strerror_r(error, buffer, 255);
-        return std::string(result);
-#else
-        char buffer[256];
-        strerror_r(error, buffer, 255);
-        return std::string(buffer);
-#endif
-#else
-        return fmt::format("{0}", error);
-#endif
+        if (input == nullptr)
+            return nullptr;
+
+        auto input_end = el::array::end(input) + 1; // include the zero element
+        auto top = el::array::copy(input, input_end, top_, end_);
+        if (top != nullptr)
+            std::swap(top_, top);
+        return top;
     }
+
 }

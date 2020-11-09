@@ -17,32 +17,28 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "libsys/Errors.h"
-
 #include "config.h"
 
-#ifdef HAVE_STRERROR_R
-#include <cstring>
-#else
-#include <fmt/format.h>
-#endif
+#include "report/libexec/Environment.h"
+#include "report/libexec/Array.h"
 
-namespace sys {
+namespace el::env {
 
-    std::string error_string(const int error) noexcept
+    const char* get_env_value(const char **envp, const char* key) noexcept
     {
-#ifdef HAVE_STRERROR_R
-#if defined(__GLIBC__) && defined(_GNU_SOURCE)
-        char buffer[256];
-        char* result = strerror_r(error, buffer, 255);
-        return std::string(result);
-#else
-        char buffer[256];
-        strerror_r(error, buffer, 255);
-        return std::string(buffer);
-#endif
-#else
-        return fmt::format("{0}", error);
-#endif
+        const size_t key_size = el::array::length(key);
+
+        for (const char** it = envp; *it != nullptr; ++it) {
+            const char* const current = *it;
+            // Is the key a prefix of the pointed string?
+            if (!el::array::equal_n(key, current, key_size))
+                continue;
+            // Is the next character is the equal sign?
+            if (current[key_size] != '=')
+                continue;
+            // It must be the one! Calculate the address of the value.
+            return current + key_size + 1;
+        }
+        return nullptr;
     }
 }
